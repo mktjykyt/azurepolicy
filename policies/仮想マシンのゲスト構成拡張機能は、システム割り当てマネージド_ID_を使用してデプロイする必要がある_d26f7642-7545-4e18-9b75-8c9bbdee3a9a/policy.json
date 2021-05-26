@@ -1,0 +1,54 @@
+{
+ "properties": {
+  "displayName": "仮想マシンのゲスト構成拡張機能は、システム割り当てマネージド ID を使用してデプロイする必要がある",
+  "policyType": "BuiltIn",
+  "mode": "Indexed",
+  "description": "ゲスト構成拡張機能には、システム割り当てマネージド ID が必要です。このポリシーのスコープ内の Azure 仮想マシンは、ゲスト構成拡張機能がインストールされているものの、システム割り当てマネージド ID がない場合は、非対応となります。詳細については https://aka.ms/gcpol でご確認ください",
+  "metadata": {
+   "version": "1.0.1",
+   "category": "Security Center"
+  },
+  "parameters": {
+   "effect": {
+    "type": "String",
+    "metadata": {
+     "displayName": "効果",
+     "description": "ポリシーの実行を有効または無効にします"
+    },
+    "allowedValues": [
+     "AuditIfNotExists",
+     "Disabled"
+    ],
+    "defaultValue": "AuditIfNotExists"
+   }
+  },
+  "policyRule": {
+   "if": {
+    "allOf": [
+     {
+      "field": "type",
+      "equals": "Microsoft.Compute/virtualMachines/extensions"
+     },
+     {
+      "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+      "equals": "Microsoft.GuestConfiguration"
+     }
+    ]
+   },
+   "then": {
+    "effect": "[parameters('effect')]",
+    "details": {
+     "type": "Microsoft.Compute/virtualMachines",
+     "name": "[first(split(field('fullName'), '/'))]",
+     "existenceCondition": {
+      "field": "identity.type",
+      "contains": "SystemAssigned"
+     }
+    }
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Authorization/policyDefinitions/d26f7642-7545-4e18-9b75-8c9bbdee3a9a",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "d26f7642-7545-4e18-9b75-8c9bbdee3a9a"
+}

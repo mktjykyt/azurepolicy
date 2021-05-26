@@ -1,0 +1,36 @@
+name: manage-azure-policy-3d23be84
+on:
+  workflow_dispatch:
+    inputs:
+      remarks:
+        description: 'Reason for triggering the workflow run'
+        required: false
+        default: 'Updating Azure Policies'
+
+
+## Uncomment the following if you wish to automatically trigger workflow run with every commit
+#
+#  push:
+#    paths:
+#      - 'policies/仮想マシンのゲスト構成拡張機能は、システム割り当てマネージド_ID_を使用してデプロイする必要がある_d26f7642-7545-4e18-9b75-8c9bbdee3a9a/**'
+#      - 'policies/ユーザー割り当て_ID_を持つ_VM_でゲスト構成の割り当てを有効にするためにシステム割り当てマネージド_ID_を追加する_497dff13-db2a-4c0f-8603-28fa3b331ab6/**'
+#      - 'policies/ID_のない仮想マシンでゲスト構成の割り当てを有効にするためにシステム割り当てマネージド_ID_を追加する_3cf2ab00-13f1-4d0c-8971-2ac904541a7e/**'
+#      - .github/workflows/manage-azure-policy-3d23be84.yml
+jobs:
+  apply-azure-policy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS_3d23be84}}
+        allow-no-subscriptions: true
+    - name: Create or Update Azure Policies
+      uses: azure/manage-azure-policy@v0
+      with:
+        paths: |
+          policies/仮想マシンのゲスト構成拡張機能は、システム割り当てマネージド_ID_を使用してデプロイする必要がある_d26f7642-7545-4e18-9b75-8c9bbdee3a9a/**
+          policies/ユーザー割り当て_ID_を持つ_VM_でゲスト構成の割り当てを有効にするためにシステム割り当てマネージド_ID_を追加する_497dff13-db2a-4c0f-8603-28fa3b331ab6/**
+          policies/ID_のない仮想マシンでゲスト構成の割り当てを有効にするためにシステム割り当てマネージド_ID_を追加する_3cf2ab00-13f1-4d0c-8971-2ac904541a7e/**
