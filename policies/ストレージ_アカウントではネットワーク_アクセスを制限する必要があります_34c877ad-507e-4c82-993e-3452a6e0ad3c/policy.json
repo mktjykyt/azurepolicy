@@ -1,0 +1,47 @@
+{
+ "properties": {
+  "displayName": "ストレージ アカウントではネットワーク アクセスを制限する必要があります",
+  "policyType": "BuiltIn",
+  "mode": "Indexed",
+  "description": "ストレージ アカウントへのネットワーク アクセスを制限する必要があります。許可されているネットワークからのアプリケーションのみがストレージ アカウントにアクセスできるようにネットワーク規則を構成します。インターネットまたはオンプレミスの特定のクライアントからの接続を許可するには、特定の Azure 仮想ネットワークからのトラフィック、またはパブリック インターネット IP アドレスの範囲にアクセスを付与できます",
+  "metadata": {
+   "version": "1.1.1",
+   "category": "Storage"
+  },
+  "parameters": {
+   "effect": {
+    "type": "String",
+    "metadata": {
+     "displayName": "エフェクト",
+     "description": "その効果によって、ポリシー規則が一致すると評価されたときの動作が決まります"
+    },
+    "allowedValues": [
+     "Audit",
+     "Deny",
+     "Disabled"
+    ],
+    "defaultValue": "Audit"
+   }
+  },
+  "policyRule": {
+   "if": {
+    "allOf": [
+     {
+      "field": "type",
+      "equals": "Microsoft.Storage/storageAccounts"
+     },
+     {
+      "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+      "notEquals": "Deny"
+     }
+    ]
+   },
+   "then": {
+    "effect": "[parameters('effect')]"
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "34c877ad-507e-4c82-993e-3452a6e0ad3c"
+}
