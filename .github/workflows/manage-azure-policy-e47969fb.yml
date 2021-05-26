@@ -1,0 +1,36 @@
+name: manage-azure-policy-e47969fb
+on:
+  workflow_dispatch:
+    inputs:
+      remarks:
+        description: 'Reason for triggering the workflow run'
+        required: false
+        default: 'Updating Azure Policies'
+
+
+## Uncomment the following if you wish to automatically trigger workflow run with every commit
+#
+#  push:
+#    paths:
+#      - 'policies/指定したメンバーのいずれかが_Administrators_グループに含まれていない_Windows_マシンを監査する_30f71ea1-ac77-4f26-9fc5-2d926bbd4ba7/**'
+#      - 'policies/Administrators_グループに余分なアカウントを持つ_Windows_マシンを監査する_3d2a3320-2a72-4c67-ac5f-caa40fbee2b2/**'
+#      - 'policies/指定したメンバーが_Administrators_グループに含まれている_Windows_マシンを監査する_69bf4abd-ca1e-4cf6-8b5a-762d42e61d4f/**'
+#      - .github/workflows/manage-azure-policy-e47969fb.yml
+jobs:
+  apply-azure-policy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS_e47969fb}}
+        allow-no-subscriptions: true
+    - name: Create or Update Azure Policies
+      uses: azure/manage-azure-policy@v0
+      with:
+        paths: |
+          policies/指定したメンバーのいずれかが_Administrators_グループに含まれていない_Windows_マシンを監査する_30f71ea1-ac77-4f26-9fc5-2d926bbd4ba7/**
+          policies/Administrators_グループに余分なアカウントを持つ_Windows_マシンを監査する_3d2a3320-2a72-4c67-ac5f-caa40fbee2b2/**
+          policies/指定したメンバーが_Administrators_グループに含まれている_Windows_マシンを監査する_69bf4abd-ca1e-4cf6-8b5a-762d42e61d4f/**

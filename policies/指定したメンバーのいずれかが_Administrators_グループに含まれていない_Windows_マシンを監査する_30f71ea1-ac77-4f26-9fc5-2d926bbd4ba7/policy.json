@@ -1,0 +1,246 @@
+{
+ "properties": {
+  "displayName": "指定したメンバーのいずれかが Administrators グループに含まれていない Windows マシンを監査する",
+  "policyType": "BuiltIn",
+  "mode": "Indexed",
+  "description": "前提条件がポリシー割り当てスコープにデプロイされている必要があります。詳細については、https://aka.ms/gcpol をご覧ください。ポリシー パラメーターに指定した 1 つ以上のメンバーがローカルの Administrators グループに含まれていない場合、マシンは準拠していません。",
+  "metadata": {
+   "category": "Guest Configuration",
+   "version": "1.0.0",
+   "requiredProviders": [
+    "Microsoft.GuestConfiguration"
+   ],
+   "guestConfiguration": {
+    "name": "AdministratorsGroupMembersToInclude",
+    "version": "1.*",
+    "configurationParameter": {
+     "MembersToInclude": "[LocalGroup]AdministratorsGroup;MembersToInclude"
+    }
+   }
+  },
+  "parameters": {
+   "IncludeArcMachines": {
+    "type": "String",
+    "metadata": {
+     "displayName": "Arc に接続されたサーバーを含める",
+     "description": "このオプションを選択すると、Arc に接続されたマシンごとに毎月請求されることに同意したものと見なされます。"
+    },
+    "allowedValues": [
+     "true",
+     "false"
+    ],
+    "defaultValue": "false"
+   },
+   "MembersToInclude": {
+    "type": "String",
+    "metadata": {
+     "displayName": "含めるメンバー",
+     "description": "ローカルの Administrators グループに含める必要があるメンバーのセミコロン区切りリスト。例: Administrator; myUser1; myUser2"
+    }
+   }
+  },
+  "policyRule": {
+   "if": {
+    "anyOf": [
+     {
+      "allOf": [
+       {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachines"
+       },
+       {
+        "anyOf": [
+         {
+          "field": "Microsoft.Compute/imagePublisher",
+          "in": [
+           "esri",
+           "incredibuild",
+           "MicrosoftDynamicsAX",
+           "MicrosoftSharepoint",
+           "MicrosoftVisualStudio",
+           "MicrosoftWindowsDesktop",
+           "MicrosoftWindowsServerHPCPack"
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "MicrosoftWindowsServer"
+           },
+           {
+            "field": "Microsoft.Compute/imageSKU",
+            "notLike": "2008*"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "MicrosoftSQLServer"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "notLike": "SQL2008*"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "microsoft-dsvm"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "equals": "dsvm-windows"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "microsoft-ads"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "in": [
+             "standard-data-science-vm",
+             "windows-data-science-vm"
+            ]
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "batch"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "equals": "rendering-windows2016"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "center-for-internet-security-inc"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "like": "cis-windows-server-201*"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "pivotal"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "like": "bosh-windows-server*"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "cloud-infrastructure-services"
+           },
+           {
+            "field": "Microsoft.Compute/imageOffer",
+            "like": "ad*"
+           }
+          ]
+         },
+         {
+          "allOf": [
+           {
+            "anyOf": [
+             {
+              "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+              "exists": "true"
+             },
+             {
+              "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+              "like": "Windows*"
+             }
+            ]
+           },
+           {
+            "anyOf": [
+             {
+              "field": "Microsoft.Compute/imageSKU",
+              "exists": "false"
+             },
+             {
+              "allOf": [
+               {
+                "field": "Microsoft.Compute/imageSKU",
+                "notLike": "2008*"
+               },
+               {
+                "field": "Microsoft.Compute/imageOffer",
+                "notLike": "SQL2008*"
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "allOf": [
+       {
+        "value": "[parameters('IncludeArcMachines')]",
+        "equals": "true"
+       },
+       {
+        "field": "type",
+        "equals": "Microsoft.HybridCompute/machines"
+       },
+       {
+        "field": "Microsoft.HybridCompute/imageOffer",
+        "like": "windows*"
+       }
+      ]
+     }
+    ]
+   },
+   "then": {
+    "effect": "auditIfNotExists",
+    "details": {
+     "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+     "name": "AdministratorsGroupMembersToInclude",
+     "existenceCondition": {
+      "allOf": [
+       {
+        "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+        "equals": "Compliant"
+       },
+       {
+        "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+        "equals": "[base64(concat('[LocalGroup]AdministratorsGroup;MembersToInclude', '=', parameters('MembersToInclude')))]"
+       }
+      ]
+     }
+    }
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Authorization/policyDefinitions/30f71ea1-ac77-4f26-9fc5-2d926bbd4ba7",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "30f71ea1-ac77-4f26-9fc5-2d926bbd4ba7"
+}
